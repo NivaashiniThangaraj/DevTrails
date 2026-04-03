@@ -54,6 +54,7 @@ router.post('/', async (req, res) => {
     );
 
     const data = await response.json();
+    console.log("Gemini RAW response:", data);
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
