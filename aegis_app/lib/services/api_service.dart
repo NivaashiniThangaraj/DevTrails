@@ -11,7 +11,7 @@ class ApiService {
   //   e.g.  http://192.168.1.5:3000
   // For Android emulator:  http://10.0.2.2:3000
   // For deployed backend:  https://your-backend.onrender.com
-  static const _base = 'http://172.20.10.2:3000';
+  static const _base = "https://aegis-backend-i4z5.onrender.com";
 
   // OpenWeatherMap free key — get one at openweathermap.org/api (30 seconds)
   // App works fine without it — shows demo weather data
