@@ -1,0 +1,2 @@
+C:/Users/NIVAASHINI/Downloads/aegis_complete/aegis_app/android/app/.cxx/Debug/6ua60s6b/x86/CMakeFiles/edit_cache.dir
+C:/Users/NIVAASHINI/Downloads/aegis_complete/aegis_app/android/app/.cxx/Debug/6ua60s6b/x86/CMakeFiles/rebuild_cache.dir

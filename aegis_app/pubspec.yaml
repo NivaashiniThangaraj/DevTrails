@@ -1,0 +1,54 @@
+name: aegis
+description: AI-powered parametric income protection for gig delivery workers.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # UI & fonts
+  google_fonts: ^6.1.0
+  # State management
+  provider: ^6.1.1
+  # HTTP
+  http: ^1.2.0
+  # Local storage
+  shared_preferences: ^2.2.2
+  # Secure storage (for JWT)
+  flutter_secure_storage: ^9.0.0
+  # Location
+  geolocator: ^11.0.0
+  geocoding: ^3.0.0
+  # Camera & image
+  image_picker: ^1.0.7
+  # Permissions
+  permission_handler: ^11.3.0
+  # Notifications
+  flutter_local_notifications: ^17.1.2
+  # Charts
+  fl_chart: ^0.68.0
+  # Connectivity
+  connectivity_plus: ^6.0.3
+  # Device info (for fingerprint)
+  device_info_plus: ^10.1.0
+  # UUID
+  uuid: ^4.3.3
+  # Date formatting
+  intl: ^0.19.0
+  # URL launcher (for UPI deep link)
+  url_launcher: ^6.2.5
+  # Loading animations
+  shimmer: ^3.0.0
+  # AI Chatbot for Aegis Assistant
+  google_generative_ai: ^0.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>Aegis</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>aegis</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(FLUTTER_BUILD_NAME)</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>$(FLUTTER_BUILD_NUMBER)</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    </array>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+
+    <!-- Location permissions -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Aegis needs your location to verify you are in the affected disruption zone and process your income protection claim.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Aegis monitors your delivery zone in the background to detect disruptions and trigger payouts automatically.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Aegis uses background location to detect disruption events in your delivery zone.</string>
+
+    <!-- Camera permission -->
+    <key>NSCameraUsageDescription</key>
+    <string>Aegis requires a live photo of your surroundings to verify your location during a disruption claim. Gallery uploads are not accepted.</string>
+
+    <!-- Photo library (read only for shimmer) -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Aegis may need to save verification photos for your claim records.</string>
+
+    <!-- Motion (accelerometer anti-spoofing) -->
+    <key>NSMotionUsageDescription</key>
+    <string>Aegis uses motion data to verify that you are actively out in the field, not stationary at home, as part of fraud prevention.</string>
+</dict>
+</plist>
