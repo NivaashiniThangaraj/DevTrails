@@ -293,6 +293,8 @@ class _PlanScreenState extends State<PlanScreen> {
       'aqi_300': 'AQI >300',
       'order_drop_30pct': 'Order volume drop >30%',
       'earnings_drop_20': 'Earnings drop >20%',
+      // NEW LINE ADDED BELOW
+      'ml_engine_prediction_score': 'AI Environment Model Score'
     };
     return m[key] ?? key;
   }

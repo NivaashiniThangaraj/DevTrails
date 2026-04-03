@@ -146,46 +146,34 @@ class AegisProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── WEATHER + RISK ─────────────────────────────────────────────────────
-  Future<void> fetchWeatherAndScore() async {
+Future<void> fetchWeatherAndScore() async {
     if (_worker == null) return;
+    
     _loadingWeather = true;
     notifyListeners();
+
     try {
-      final w = await ApiService.fetchWeather(_worker!.city);
-      final coords = _cityCoords(_worker!.city);
-      final aqi = await ApiService.fetchAqi(coords[0], coords[1]);
+      // 1. Fetch live weather (keep your existing logic here)
+      _weather = await ApiService.fetchWeather(_worker!.city);
 
-      _weather = WeatherData(
-        tempC: w.tempC, rainfallMm3h: w.rainfallMm3h,
-        windKmh: w.windKmh, aqi: aqi,
-        description: w.description, city: w.city,
-        fetchedAt: w.fetchedAt,
-      );
-
-      final now = DateTime.now();
-      _riskResult = RiskEngine.compute(
+      // 2. NEW: Ask the Node.js backend for the ML Risk Prediction
+      _riskResult = await ApiService.computeRiskScore(
+        city: _worker!.city,
         zone: _worker!.zone,
-        weeklyEarningsAvg:
-            _worker!.weeklyEarningsAvg > 0 ? _worker!.weeklyEarningsAvg : 4500,
-        rainfallMm:   _weather!.rainfallMm3h,
-        tempC:        _weather!.tempC,
-        aqi:          _weather!.aqi,
-        orderDropPct: 0,
-        earningsDropPct: 0,
-        hasClaimsLast12Weeks: _claims.isNotEmpty,
-        monsoonSeason: now.month >= 10 && now.month <= 12,
+        weeklyEarningsAvg: _worker!.weeklyEarningsAvg,
+        rainfallMm: _weather!.rainfallMm3h,
+        tempC: _weather!.tempC,
+        aqi: _weather!.aqi,
+        monsoonSeason: true, // You can make this dynamic if needed
       );
 
-      if (_weather!.rainfallMm3h > 65) {
-        await NotificationService.showDisruptionAlert(
-          title: 'Heavy Rainfall — ${_worker!.city}',
-          body:  'Rain ${_weather!.rainfallMm3h.toStringAsFixed(1)}mm detected.',
-        );
-      }
-    } catch (_) {}
-    _loadingWeather = false;
-    notifyListeners();
+    } catch (e) {
+      print("Error fetching weather or AI score: $e");
+      // Handle error state appropriately
+    } finally {
+      _loadingWeather = false;
+      notifyListeners();
+    }
   }
 
   // ── SUBSCRIBE ──────────────────────────────────────────────────────────
@@ -331,4 +319,6 @@ class AegisProvider extends ChangeNotifier {
     _pollTimer?.cancel();
     super.dispose();
   }
+
+  void reset() {}
 }

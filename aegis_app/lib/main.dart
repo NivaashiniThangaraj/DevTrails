@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
 import 'providers/aegis_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/plan_screen.dart'; // ✅ ADD
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +41,16 @@ class AegisApp extends StatelessWidget {
       title: 'Aegis',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const SplashScreen(),
+
+      // ✅ ROUTES ADDED
+      initialRoute: '/',
+
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/onboarding': (context) => const OnboardingScreen(),
+        '/profile': (context) => const ProfileScreen(),
+        '/plans': (context) => const PlanScreen(),
+      },
     );
   }
 }

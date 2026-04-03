@@ -85,13 +85,31 @@ class DashboardTab extends StatelessWidget {
                     fontWeight: FontWeight.w700, color: AppColors.red)),
               ),
           ])),
-          Container(width: 36, height: 36,
-            decoration: const BoxDecoration(
-              color: Color(0xFF1E3A6E), shape: BoxShape.circle),
-            child: Center(child: Text(
-              (w?.name.isNotEmpty == true) ? w!.name[0].toUpperCase() : 'S',
-              style: GoogleFonts.nunito(fontSize: 15,
-                fontWeight: FontWeight.w700, color: const Color(0xFF85B7EB))))),
+          GestureDetector(
+  onTap: () {
+    Navigator.pushNamed(context, '/profile'); // 🔥 THIS OPENS PROFILE
+  },
+  child: Container(
+    width: 36,
+    height: 36,
+    decoration: const BoxDecoration(
+      color: Color(0xFF1E3A6E),
+      shape: BoxShape.circle,
+    ),
+    child: Center(
+      child: Text(
+        (w?.name.isNotEmpty == true)
+            ? w!.name[0].toUpperCase()
+            : 'S',
+        style: GoogleFonts.nunito(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF85B7EB),
+        ),
+      ),
+    ),
+  ),
+),
         ]),
         const SizedBox(height: 14),
         const Divider(color: Color(0xFF1E3A6E), height: 1),

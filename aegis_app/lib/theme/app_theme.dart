@@ -23,6 +23,8 @@ class AppColors {
   static const muted      = Color(0xFF888780);
   static const border     = Color(0xFFE8EAF0);
   static const divider    = Color(0xFFF1EFE8);
+
+  static var textPrimary;
 }
 
 class AppTheme {

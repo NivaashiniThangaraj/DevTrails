@@ -198,22 +198,22 @@ class ApiService {
     final j = jsonDecode(res.body);
     double rain = 0;
     if (j['rain'] != null) rain = ((j['rain']['3h'] ?? j['rain']['1h'] ?? 0)).toDouble();
-    return WeatherData(
-  tempC: 45,           // extreme heat
-  rainfallMm3h: 80,    // heavy rain
-  windKmh: 50,
-  aqi: 350,            // dangerous AQI
-  description: 'EXTREME WEATHER (DEMO)',
-  city: city,
-  fetchedAt: DateTime.now(),
-);
-// return WeatherData(
-//       tempC: (j['main']['temp'] as num).toDouble(),
-//       rainfallMm3h: rain,
-//       windKmh: ((j['wind']['speed'] as num) * 3.6),
-//       aqi: 0, description: j['weather'][0]['description'] ?? '',
-//       city: city, fetchedAt: DateTime.now(),
-//     );
+//     return WeatherData(
+//   tempC: 45,           // extreme heat
+//   rainfallMm3h: 80,    // heavy rain
+//   windKmh: 50,
+//   aqi: 350,            // dangerous AQI
+//   description: 'EXTREME WEATHER (DEMO)',
+//   city: city,
+//   fetchedAt: DateTime.now(),
+// );
+return WeatherData(
+      tempC: (j['main']['temp'] as num).toDouble(),
+      rainfallMm3h: rain,
+      windKmh: ((j['wind']['speed'] as num) * 3.6),
+      aqi: 0, description: j['weather'][0]['description'] ?? '',
+      city: city, fetchedAt: DateTime.now(),
+    );
   }
 
   static Future<int> fetchAqi(double lat, double lng) async {
