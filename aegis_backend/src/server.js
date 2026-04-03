@@ -18,20 +18,21 @@ const riskRoutes         = require('./routes/risk');
 const subscriptionRoutes = require('./routes/subscription');
 const triggerRoutes      = require('./routes/triggers');
 const claimsRoutes       = require('./routes/claims');
+const chatRoutes         = require('./routes/chat'); // ✅ ADD THIS
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Security & middleware ────────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: '*' })); // restrict in production
+app.use(cors({ origin: '*' }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use(express.json({ limit: '10mb' })); // allow base64 images
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ── Rate limiting ────────────────────────────────────────────────────────
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -40,7 +41,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 10, // stricter for OTP endpoints
+  max: 10,
   message: { message: 'Too many OTP requests — please wait 10 minutes' },
 });
 
@@ -68,6 +69,7 @@ app.use('/risk',         riskRoutes);
 app.use('/subscription', subscriptionRoutes);
 app.use('/triggers',     triggerRoutes);
 app.use('/claims',       claimsRoutes);
+app.use('/chat',         chatRoutes); // ✅ ADD THIS LINE
 
 // ── 404 handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {
@@ -86,23 +88,18 @@ app.use((err, req, res, next) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────
 async function start() {
-  // Verify DB connection
   try {
     await db.query('SELECT 1');
     console.log('[DB] PostgreSQL connected');
   } catch (err) {
     console.error('[DB] Connection failed:', err.message);
-    console.error('Check your DATABASE_URL in .env and that PostgreSQL is running.');
     process.exit(1);
   }
 
-  // Start Express
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[Server] Aegis backend running on port ${PORT}`);
-    console.log(`[Server] Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 
-  // Start the 30-minute trigger polling loop
   startTriggerEngine();
 }
 
