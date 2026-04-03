@@ -2,7 +2,6 @@
 
 const express = require('express');
 const router = express.Router();
-const fetch = require('node-fetch');
 
 const SYSTEM_PROMPT = `
 You are Aegis AI, a cute friendly robot assistant 🤖 for Aegis app users.
