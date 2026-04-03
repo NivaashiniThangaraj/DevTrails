@@ -1,8 +1,5 @@
 'use strict';
 
-// Mirrors the README formula exactly:
-// Weekly Premium = BASE × RiskMultiplier × LoyaltyFactor × ZoneFactor × SeasonFactor
-
 const ZONE_FACTORS = {
   'Zone 1 — North':   1.05,
   'Zone 2 — South':   1.00,
@@ -11,15 +8,8 @@ const ZONE_FACTORS = {
   'Zone 5 — West':    0.95,
 };
 
-const WEIGHTS = {
-  rainfall_65mm:    1.0,
-  temp_41c:         0.9,
-  aqi_300:          0.8,
-  order_drop_30pct: 1.0,
-  earnings_drop_20: 0.9,
-};
-
-function computeRiskScore({
+// Now an async function because it calls the Python API
+async function computeRiskScore({
   zone,
   weeklyEarningsAvg = 4500,
   rainfallMm = 0,
@@ -30,71 +20,92 @@ function computeRiskScore({
   hasClaimsLast12Weeks = false,
   monsoonSeason = false,
 }) {
-  // 1. Active conditions
-  const conditions = {};
-  if (rainfallMm > 65)        conditions.rainfall_65mm    = WEIGHTS.rainfall_65mm;
-  if (tempC > 41)             conditions.temp_41c          = WEIGHTS.temp_41c;
-  if (aqi > 300)              conditions.aqi_300           = WEIGHTS.aqi_300;
-  if (orderDropPct > 0.30)    conditions.order_drop_30pct  = WEIGHTS.order_drop_30pct;
-  if (earningsDropPct > 0.20) conditions.earnings_drop_20  = WEIGHTS.earnings_drop_20;
+  let mlRiskScore = 0;
+  let mlBand = 'low';
 
-  // 2. Raw score → normalise to 0-100
-  const rawScore = Object.values(conditions).reduce((a, b) => a + b, 0);
-  const maxPossible = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
-  const riskScore = Math.min(100, Math.round((rawScore / maxPossible) * 100));
+  try {
+    // 1. Prepare data for the Python ML Service
+    const mlPayload = {
+      worker: { worker_id: "W-ML-EVAL" },
+      location: { lat: 13.08, lon: 80.27 }, // Defaults for geographic context
+      external_disruption: {
+        weather: {
+          temp_c: tempC,
+          feels_like_c: tempC + 2, 
+          rainfall_mm: rainfallMm
+        },
+        air_quality: {
+          pm25: aqi * 0.5, // Rough conversion for the model
+          pm10: aqi
+        },
+        traffic: { traffic_index: 50 }
+      },
+      business_impact: {
+        avg_daily_earnings: weeklyEarningsAvg / 6,
+        expected_hours: 10
+      }
+    };
 
-  // 3. RiskMultiplier = 1 + 0.4 × min(rawScore/8, 1)
-  const riskMultiplier = +(1 + 0.4 * Math.min(rawScore / 8, 1)).toFixed(2);
+    // 2. Fetch live ML Prediction from Python (Port 8000)
+    // Note: Requires Node.js 18+ for native fetch
+    const response = await fetch('http://localhost:8000/api/v1/full-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mlPayload)
+    });
 
-  // 4. Loyalty factor
+    if (response.ok) {
+        const mlData = await response.json();
+        mlRiskScore = mlData.risk_analysis.risk_score;
+        mlBand = mlData.risk_analysis.risk_level.toLowerCase();
+    } else {
+        console.error("Python ML service returned an error, using fallback.");
+        mlRiskScore = (rainfallMm > 65 || tempC > 41) ? 8 : 2;
+        mlBand = mlRiskScore >= 8 ? 'high' : 'low';
+    }
+  } catch (error) {
+    console.error("Failed to connect to Python ML service. Is it running on port 8000?", error.message);
+    mlRiskScore = (rainfallMm > 65 || tempC > 41) ? 8 : 2;
+    mlBand = mlRiskScore >= 8 ? 'high' : 'low';
+  }
+
+  // 3. Normalise ML score (0-10) to 0-100 scale for legacy frontend compatibility
+  const riskScore100 = Math.min(100, Math.round((mlRiskScore / 10) * 100));
+
+  // 4. RiskMultiplier = 1 + 0.4 × min(mlRiskScore/8, 1)
+  const riskMultiplier = +(1 + 0.4 * Math.min(mlRiskScore / 8, 1)).toFixed(2);
+
+  // 5. Business Logic & Premium Calculation
   const loyaltyFactor = hasClaimsLast12Weeks ? 1.0 : 0.85;
-
-  // 5. Zone factor
   const zoneFactor = ZONE_FACTORS[zone] || 1.0;
-
-  // 6. Season factor
   const seasonFactor = monsoonSeason ? 1.3 : 1.0;
-
-  // 7. BASE = weeklyEarningsAvg × 0.75%
   const base = weeklyEarningsAvg * 0.0075;
 
-  // 8. Final premium clamped to ₹13–₹100
   const weeklyPremium = Math.round(
-    Math.min(100, Math.max(13,
-      base * riskMultiplier * loyaltyFactor * zoneFactor * seasonFactor
-    ))
+    Math.min(100, Math.max(13, base * riskMultiplier * loyaltyFactor * zoneFactor * seasonFactor))
   );
 
-  // 9. Coverage
   const dailyEarnings = weeklyEarningsAvg / 6;
   const dailyCoverage = Math.round(dailyEarnings * 0.80);
   const maxWeekly = dailyCoverage * 2;
 
-  // 10. Band
-  let band = 'low';
-  if (riskScore >= 75) band = 'extreme';
-  else if (riskScore >= 50) band = 'high';
-  else if (riskScore >= 25) band = 'medium';
-
+  // 6. Return standard format exactly as the Flutter models.dart expects
   return {
-    score: riskScore,
+    score: riskScore100,
     multiplier: riskMultiplier,
     weeklyPremium,
     dailyCoverage,
     maxWeekly,
-    breakdown: conditions,
-    band,
+    breakdown: { "ml_engine_prediction_score": mlRiskScore },
+    band: mlBand,
   };
 }
 
-// Payout = (VerifiedHourlyRate × DisruptionHoursLost) × PayoutPct
 function computePayout({ weeklyEarningsAvg, disruptionHours, payoutPct }) {
   const hourlyRate = weeklyEarningsAvg / (6 * 10);
   return Math.round(hourlyRate * disruptionHours * payoutPct);
 }
 
-// Fraud score — Isolation Forest simulation
-// In production this calls the Python FastAPI ML service
 function computeFraudScore({
   gpsMatchZone = true,
   isMockLocation = false,
@@ -104,7 +115,7 @@ function computeFraudScore({
   timestampAnomalous = false,
 }) {
   let score = 0;
-  if (isMockLocation)         score += 0.45; // hard flag
+  if (isMockLocation)         score += 0.45;
   if (!gpsMatchZone)          score += 0.25;
   if (!workerOnlineBefore)    score += 0.20;
   if (!orderActivityRecent)   score += 0.15;

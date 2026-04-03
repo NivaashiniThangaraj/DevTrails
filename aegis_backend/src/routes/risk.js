@@ -16,7 +16,8 @@ router.post('/score', auth, async (req, res) => {
       monsoonSeason,
     } = req.body;
 
-    const result = computeRiskScore({
+    // ADDED AWAIT HERE
+    const result = await computeRiskScore({
       zone:              zone || 'Zone 4 — Central',
       weeklyEarningsAvg: parseFloat(weeklyEarningsAvg) || 4500,
       rainfallMm:        parseFloat(rainfallMm) || 0,
