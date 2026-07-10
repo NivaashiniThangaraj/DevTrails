@@ -1,30 +1,40 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
+/// ─────────────────────────────────────────────────────────────────────────
+/// DEMO / OFFLINE MODE
+///
+/// Returns canned, helpful replies so the in-app Aegis AI assistant works
+/// with no backend. Replace with a real LLM/backend call to go live.
+/// ─────────────────────────────────────────────────────────────────────────
 class ChatService {
-  static const String _base =
-      "https://aegis-backend-i4z5.onrender.com";
-
   static Future<String> generateResponse(String userInput) async {
-    try {
-      final res = await http.post(
-        Uri.parse("$_base/chat"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "message": userInput,
-        }),
-      );
+    // Simulate a little thinking time for a natural feel.
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      if (res.statusCode == 200) {
-        final data = jsonDecode(res.body);
-        return data["reply"] ?? "No response";
-      } else {
-        return "Server error 😅";
-      }
-    } catch (e) {
-      return "Chatbot unavailable 😅";
+    final q = userInput.toLowerCase();
+
+    if (q.contains('hello') || q.contains('hi') || q.contains('hey')) {
+      return "Hi! I'm Aegis AI 🤖 Ask me about insurance, claims, coverage, or how the app works!";
     }
+    if (q.contains('claim')) {
+      return "You can file a claim from the Alerts tab when a disruption is active. "
+          "In this demo, claims are pre-filled with sample data so you can see the full flow. 📝";
+    }
+    if (q.contains('plan') || q.contains('premium')) {
+      return "We offer Basic, Standard and Premium plans. Your premium is computed from your "
+          "zone risk and average earnings — pick one on the Plans screen. 💡";
+    }
+    if (q.contains('payout')) {
+      return "Payouts trigger automatically once both risk gates pass. Demo payouts show up as "
+          "\"Paid\" in your Claims tab. 💸";
+    }
+    if (q.contains('weather') || q.contains('rain') || q.contains('heat')) {
+      return "Weather drives your risk score. Heavy rain, extreme heat and hazardous AQI all "
+          "raise your score — and your payout potential. 🌦️";
+    }
+    if (q.contains('kyc') || q.contains('aadhaar')) {
+      return "KYC verifies your identity with your Aadhaar number. It's a one-time step and "
+          "unlocks subscriptions. ✅";
+    }
+    return "I'm your Aegis assistant 🤖 In this demo everything runs offline with sample data. "
+        "Try asking about claims, plans, payouts, or weather!";
   }
 }

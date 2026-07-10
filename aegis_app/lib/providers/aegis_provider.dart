@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/risk_engine.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
+import '../services/platform_utils.dart';
 
 enum AppState { initial, loading, authenticated, unauthenticated, error }
 
@@ -238,7 +237,7 @@ Future<void> fetchWeatherAndScore() async {
     if (xfile == null) {
       throw Exception('Photo is required to verify your location.');
     }
-    final bytes = await File(xfile.path).readAsBytes();
+    final bytes = await xfile.readAsBytes();
     final b64   = base64Encode(bytes);
 
     final claim = await ApiService.submitClaim(
@@ -256,12 +255,7 @@ Future<void> fetchWeatherAndScore() async {
   // ── DEVICE ID ──────────────────────────────────────────────────────────
   Future<void> _loadDeviceId() async {
     try {
-      final info = DeviceInfoPlugin();
-      if (Platform.isAndroid) {
-        _deviceId = (await info.androidInfo).id;
-      } else if (Platform.isIOS) {
-        _deviceId = (await info.iosInfo).identifierForVendor;
-      }
+      _deviceId = await getDeviceId();
     } catch (_) {}
   }
 

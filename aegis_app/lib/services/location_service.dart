@@ -1,8 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class LocationService {
   static Future<bool> checkAndRequestPermission() async {
+    // Web has no native location-permission prompt; the app uses a stubbed
+    // position so the demo flows work without a real GPS fix.
+    if (kIsWeb) return true;
+
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return false;
 
@@ -72,6 +77,7 @@ class LocationService {
 
   /// Detects mock location provider (anti-spoofing layer 1).
   static Future<bool> isMockLocation() async {
+    if (kIsWeb) return false;
     try {
       final pos = await Geolocator.getCurrentPosition();
       return pos.isMocked;
