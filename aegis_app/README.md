@@ -39,8 +39,8 @@ flutter run
 ### Build a production web bundle
 
 ```bash
-# The repo is served from /DevTrails/, so the base href is required:
-flutter build web --base-href "/DevTrails/"
+# The repo is served from /DevTrails/, so the base href is required.
+flutter build web --base-href "/DevTrails/" --release
 # Output: build/web/
 ```
 
