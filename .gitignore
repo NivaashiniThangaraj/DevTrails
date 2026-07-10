@@ -5,3 +5,5 @@ build/
 .dart_tool/
 ios/Pods/
 android/.gradle/
+# Editor
+.vscode/
